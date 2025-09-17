@@ -1,5 +1,7 @@
 # 数组
 
+数组是一块连续的内存空间，然后数组名就是这个内存空间的首地址，通过索引的方式可以查找数组中对应的元素
+
 ==动态数组的实现==
 
 ```python
@@ -142,3 +144,347 @@ if __name__ == "main":
 
 # 链表
 
+==单链表==
+
+```python
+class ListNode:
+    def __init__(self,input):
+        self.val = input
+        self.next = None
+
+class Node:
+    def __init__(self,prev,element,next):
+        self.val = element
+        self.next = next
+        self.prev = prev
+```
+
+链表不需要像数组那样分配连续的内存空间，通过next和prev两个指针将散落在内存空间中的存储内容链接在一起
+
+```python
+       
+    #单链表的基本操作
+class ListNode:
+    def __init__(self,x):
+        self.val = x
+        self.next = None
+    
+    #输入数组，输出单链表
+    def createLinkedList(arr:'List[int]') -> 'ListNode':
+        if arr is None or len(arr) == 0:
+            return None
+        
+        head = Listnode(arr[0])
+        cur = head
+        for i in range(i,len(arr)):
+            cur = ListNode(arr[i])
+            cur = cur.next
+
+        return head
+    
+
+    def add_first(self,e,head):
+        newNode = ListNode(e)
+        newNode.next = head
+        head = newNode
+    
+    def add_last(self,e,head):
+        newNode = ListNode(e)
+
+        p = head
+
+        while p.next is not None :
+            p = p.next
+        
+        p.next = newNode
+    
+    def add(self,e,head,index):
+        newNode = ListNode(e)
+
+        self._check_position_index(index)
+
+        p = head 
+
+        for i in range(index):
+            p = p.next
+
+        newNode.next = p.next
+        p.next = newNode
+
+    
+    def remove(self,index,head):
+        self._check_position_index(index)
+
+        p = head
+
+        for i in range(index):
+            p = p.next
+        
+        p = p.next.next
+```
+
+```python
+#doublyList basic operations
+
+class DoublyListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
+        self.prev = None
+        
+def createDoublyLinkedList(arr: List[int]) -> Optional[DoublyListNode]:
+    if not arr:
+        return None
+    
+    head = DoublyListNode(arr[0])
+    cur = head
+    
+    # for 循环迭代创建双链表
+    for val in arr[1:]:
+        new_node = DoublyListNode(val)
+        cur.next = new_node
+        new_node.prev = cur
+        cur = cur.next
+    
+    return head
+
+    # 创建一条双链表
+head = create_doubly_linked_list([1, 2, 3, 4, 5])
+
+# 在双链表头部插入新节点 0
+new_head = DoublyListNode(0)
+new_head.next = head
+head.prev = new_head
+head = new_head
+# 现在链表变成了 0 -> 1 -> 2 -> 3 -> 4 -> 5
+
+
+# 创建一条双链表
+head = createDoublyLinkedList([1, 2, 3, 4, 5])
+
+# 删除第 4 个节点
+# 先找到第 3 个节点
+p = head
+for i in range(2):
+    p = p.next
+
+# 现在 p 指向第 3 个节点，我们将它后面的那个节点摘除出去
+toDelete = p.next
+
+# 把 toDelete 从链表中摘除
+p.next = toDelete.next
+toDelete.next.prev = p
+
+# 把 toDelete 的前后指针都置为 null 是个好习惯（可选）
+toDelete.next = None
+toDelete.prev = None
+
+# 现在链表变成了 1 -> 2 -> 3 -> 5
+
+```
+
+MyLinkedList代码实现
+
+1. 同时持有头尾节点的引用
+2. 虚拟头尾节点：
+    创建一个虚拟头节点和一个虚拟尾节点，无论双链表是否为空，这两个节点都存在；这样就不会有空指针
+3. 防止内存泄漏
+
+
+```python
+class Node:
+    def __init__(self,val):
+        self.val = val
+        self.next = None
+        self.prev = None
+    
+
+class MyLinkedList:
+    #virtual head and tail node
+    def __init__(self):
+        self.head = Node(None)
+        self.tail = Node(None)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+        self.size = 0
+    
+    # add element
+    def add_last(self,e):
+        x = Node(e)
+        
+        temp = self.tail.prev
+        temp.next = x
+        x.prev = temp
+
+        self.tail.prev = x
+        x.next = self.tail
+
+        self.size += 1
+    
+    def add_first(self,e):
+        x = Node(e)
+
+        temp = self.head.next
+        temp.next = x
+        x.prev = temp
+
+        self.head.prev = x
+        x.prev = self.head
+
+
+    def add(self, index, element):
+        self.check_position_index(index)
+        if index == self.size:
+            self.add_last(element)
+            return
+
+        # 找到 index 对应的 Node
+        p = self.get_node(index)
+        temp = p.prev
+        # temp <-> p
+
+        # 新要插入的 Node
+        x = Node(element)
+
+        p.prev = x
+        temp.next = x
+
+        x.prev = temp
+        x.next = p
+
+        # temp <-> x <-> p
+
+        self.size += 1
+
+    # ***** 删 *****
+
+    def remove_first(self):
+        if self.size < 1:
+            raise IndexError("No elements to remove")
+        # 虚拟节点的存在是我们不用考虑空指针的问题
+        x = self.head.next
+        temp = x.next
+        # head <-> x <-> temp
+        self.head.next = temp
+        temp.prev = self.head
+
+        # head <-> temp
+
+        self.size -= 1
+        return x.val
+
+    def remove_last(self):
+        if self.size < 1:
+            raise IndexError("No elements to remove")
+        x = self.tail.prev
+        temp = x.prev
+        # temp <-> x <-> tail
+
+        self.tail.prev = temp
+        temp.next = self.tail
+
+        # temp <-> tail
+
+        self.size -= 1
+        return x.val
+
+    def remove(self, index):
+        self.check_element_index(index)
+        # 找到 index 对应的 Node
+        x = self.get_node(index)
+        prev = x.prev
+        next = x.next
+        # prev <-> x <-> next
+        prev.next = next
+        next.prev = prev
+
+        self.size -= 1
+
+        return x.val
+
+    # ***** 查 *****
+
+    def get(self, index):
+        self.check_element_index(index)
+        # 找到 index 对应的 Node
+        p = self.get_node(index)
+
+        return p.val
+
+    def get_first(self):
+        if self.size < 1:
+            raise IndexError("No elements in the list")
+
+        return self.head.next.val
+
+    def get_last(self):
+        if self.size < 1:
+            raise IndexError("No elements in the list")
+
+        return self.tail.prev.val
+
+    # ***** 改 *****
+
+    def set(self, index, val):
+        self.check_element_index(index)
+        # 找到 index 对应的 Node
+        p = self.get_node(index)
+
+        old_val = p.val
+        p.val = val
+
+        return old_val
+
+    # ***** 其他工具函数 *****
+
+    def size(self):
+        return self.size
+
+    def is_empty(self):
+        return self.size == 0
+
+    def get_node(self, index):
+        self.check_element_index(index)
+        p = self.head.next
+        # TODO: 可以优化，通过 index 判断从 head 还是 tail 开始遍历
+        for _ in range(index):
+            p = p.next
+        return p
+
+    def is_element_index(self, index):
+        return 0 <= index < self.size
+
+    def is_position_index(self, index):
+        return 0 <= index <= self.size
+
+    # 检查 index 索引位置是否可以存在元素
+    def check_element_index(self, index):
+        if not self.is_element_index(index):
+            raise IndexError(f"Index: {index}, Size: {self.size}")
+
+    # 检查 index 索引位置是否可以添加元素
+    def check_position_index(self, index):
+        if not self.is_position_index(index):
+            raise IndexError(f"Index: {index}, Size: {self.size}")
+
+    def display(self):
+        print(f"size = {self.size}")
+        p = self.head.next
+        while p != self.tail:
+            print(f"{p.val} <-> ", end="")
+            p = p.next
+        print("null\n")
+
+if __name__ == "__main__":
+    list = MyLinkedList()
+    list.add_last(1)
+    list.add_last(2)
+    list.add_last(3)
+    list.add_first(0)
+    list.add(2, 100)
+
+    list.display()
+    # size = 5
+    # 0 <-> 1 <-> 100 <-> 2 <-> 3 <-> null
+        
+```
