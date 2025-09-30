@@ -1,8 +1,8 @@
-# 数组
+## 数组
 
 数组是一块连续的内存空间，然后数组名就是这个内存空间的首地址，通过索引的方式可以查找数组中对应的元素
 
-==动态数组的实现==
+*动态数组的实现*
 
 ```python
 class myarraylist:
@@ -142,9 +142,9 @@ if __name__ == "main":
 
 ```
 
-# 链表
+## 链表
 
-==单链表==
+*单链表*
 
 ```python
 class ListNode:
@@ -283,7 +283,7 @@ toDelete.prev = None
 
 ```
 
-MyLinkedList代码实现
+*MyLinkedList代码实现*
 
 1. 同时持有头尾节点的引用
 2. 虚拟头尾节点：
@@ -487,4 +487,178 @@ if __name__ == "__main__":
     # size = 5
     # 0 <-> 1 <-> 100 <-> 2 <-> 3 <-> null
         
+```
+
+## 环形数组
+
+数组在计算机中是一块连续的内存空间，不存在首尾相连的情况
+但是可以在逻辑上实现环形
+
+==通过取余数的方法，让超过数组尾端的索引回归到数组的开始==
+
+```python
+# 长度为 5 的数组
+arr = [1, 2, 3, 4, 5]
+i = 0
+# 模拟环形数组，这个循环永远不会结束
+while i < len(arr):
+    print(arr[i])
+    i = (i + 1) % len(arr)
+```
+
+```python
+class CycledArray:
+    def __init__(self,size = 1):
+        self.size = size
+        self.arr = [None] * size
+        #cycledarray uses two indexs [start,end) 
+        #start is the first valid element in the arr
+        #end is the next element of the last valid element in the arr
+        self.start = 0
+        self.end = 0
+        self.count = 0 #num of valid element
+    
+    def resize(self,newSize):
+        # create new arr
+        newArr = [None] * newSize
+        # copy origin info in the arr
+        for i in range(self.count):
+            newArr[i] = self.arr[(self.start + i) % self.size]
+        self.arr = newArr
+        #reset end and start pointer
+        self.start = 0
+        self.end = self.count
+        self.size = newSize
+
+    def add_first(self,element):
+        self.check_is_full()
+        #change the start index 
+        self.start = (self.start - 1 + self.size) % self.size
+        #add new element
+        self.arr[self.start] = element
+        #reset count
+        self.count += 1
+    
+    def remove_first(self):
+        self.check_is_empty()
+        #remove first element
+        self.arr[self.start] = None
+        #change the start index 
+        self.start = (self.start + 1 + self.size) % self.size
+        #reset count
+        self.count -= 1
+        #resize arr if needed
+        if self.count > 0 and self.count == self.size // 4:
+            self.resize(self.size // 2)
+    
+    def add_last(self,element):
+        self.check_is_full()
+        #change the end index
+        self.end = (self.end + 1 + self.size) % self.size
+        #add new element
+        self.arr[end-1] = element
+        #reset count
+        self.count += 1
+
+    def remove_last(self):
+        if self.is_empty():
+            raise Exception("Array is empty")
+        # since end can't be reached，so minus and value
+        self.end = (self.end - 1 + self.size) % self.size
+        self.arr[self.end] = None
+        self.count -= 1
+        # resize
+        if self.count > 0 and self.count == self.size // 4:
+            self.resize(self.size // 2)
+
+
+
+    def check_is_full(self):
+        if(self.count == self.size):
+            self.resize(2 * self.count)
+        
+    def check_is_empty(self):
+        if(self.count == 0):
+            raise Exception("Array is empty")
+```
+
+## 队列与栈
+
+![alt text](image.png)
+
+队列： 先来的先离开 （排队排在最前面）
+栈： 先来的后离开 （被压在最下面）
+
+==双端队列的实现==
+
+```python
+class MyArrayDeque:
+    def __init__(self):
+        self.arr = CycleArray()
+
+    # 从队头插入元素，时间复杂度 O(1)
+    def add_first(self, e):
+        self.arr.add_first(e)
+
+    # 从队尾插入元素，时间复杂度 O(1)
+    def add_last(self, e):
+        self.arr.add_last(e)
+
+    # 从队头删除元素，时间复杂度 O(1)
+    def remove_first(self):
+        return self.arr.remove_first()
+
+    # 从队尾删除元素，时间复杂度 O(1)
+    def remove_last(self):
+        return self.arr.remove_last()
+
+    # 查看队头元素，时间复杂度 O(1)
+    def peek_first(self):
+        return self.arr.get_first()
+
+    # 查看队尾元素，时间复杂度 O(1)
+    def peek_last(self):
+        return self.arr.get_last()
+```
+
+==为什么最好用环形数组而不是普通数组实现双端队列？==
+
+环形数组是为了让数组对应的内存空间在逻辑上实现相连，在操作上采用start和end两个index标注数组逻辑上的头和尾 然后根据余数的方式获取某一个索引对应的实际存放位置
+
+环形数组可以保证头尾增加和删除元素的复杂度都是O(1)，但是普通数组在头部增加和删除元素时需要移动后续元素
+
+## 哈希表
+
+```python
+class KVNode:
+    def __init__(self,key,value):
+        self.key = key
+        self.value = value
+
+class ExampleChainingHashMap:
+
+    def __init__(self,capacity):
+        self.table = [None] * capacity
+    
+    def hash(self,key):
+        hashcode = key % len(self.table)
+        return hashcode
+    
+    def get(self,key):
+        index = self.hash(key)
+
+        if self.table[index] is None:
+            return -1
+        
+        list = self.table[index]
+
+        for node in list:
+            if node.key == key:
+                return node.value
+            
+            else:
+                return -1
+
+
+
 ```
